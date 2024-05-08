@@ -1,0 +1,47 @@
+# Use root/example as user/password credentials
+version: "3.1"
+
+services:
+  # mongo:
+  #   container_name: db
+  #   image: mongo
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: admin
+  #     MONGO_INITDB_ROOT_PASSWORD: secret
+  mongo:
+    build:
+      context: .
+      args:
+        MONGO_VERSION: 4
+    environment:
+      MONGO_REPLICA_HOST: 127.0.0.1
+      MONGO_REPLICA_PORT: 27018
+      # Use "mongo" instead of "mongosh" before v5.0
+      MONGO_COMMAND: "mongo"
+    ports:
+      - "27018:27018"
+    restart: unless-stopped
+    healthcheck:
+      # Use "mongo" instead of "mongosh" before v5.0
+      test:
+        [
+          "CMD",
+          "mongo",
+          "admin",
+          "--port",
+          "27018",
+          "--eval",
+          "db.adminCommand('ping').ok",
+        ]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+#     volumes:
+#       - mongodb_data:/data/db
+
+# volumes:
+#   mongodb_data:
+#     driver: local
